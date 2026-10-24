@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Family 100 - Sejarah Indonesia</title>
+    <!-- 
+    Nama: FAMILY 100 ANAK PINTAR
+    Mata Pelajaran: Sejarah
+    Kelas: XII SIJA 1
+    Materi: Perjuangan Mempertahankan Kemerdekaan & Dinamika Orde Lama
+    -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #050b14;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, .font-title {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* 16:9 Aspect Ratio Container */
+        .game-wrapper {
+            width: 100vw;
+            max-width: 1920px;
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, #0b1437 0%, #060b1e 100%);
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            display: flex;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            position: absolute;
+            top: 0; left: 0;
+            z-index: 10;
+        }
+        .screen.active { 
+            display: flex; 
+        }
+        .intro-bg {
+            background: radial-gradient(circle at center, #112240 0%, #050b14 100%);
+        }
+
+        .panel-team {
+            background-color: #111a3f;
+            border: 2px solid #233560;
+            border-radius: 16px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .panel-team.active-team {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .answer-card {
+            background-color: #1e316a;
+            border: 2px solid #2b458c;
+            border-radius: 12px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .answer-card.revealed {
+            background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+            border-color: #60a5fa;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+            transform: scale(1.02);
+        }
+
+        .strike-x {
+            color: #2c3e50;
+            text-shadow: 1px 1px 2px #000;
+            transition: color 0.3s;
+        }
+        .strike-x.active {
+            color: #ef4444;
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 2px 2px 0px #000;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        #overlay-wrong {
+            pointer-events: none;
+            background: rgba(220, 38, 38, 0.3);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s;
+        }
+
+        .btn-gold {
+            background: linear-gradient(180deg, #ffe066 0%, #f59e0b 100%);
+            color: #451a03;
+            border: 2px solid #fbbf24;
+            text-transform: uppercase;
+            box-shadow: 0 4px 0 #b45309;
+            transition: all 0.1s;
+        }
+        .btn-gold:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #b45309;
+        }
+        
+        .operator-btn {
+            transition: opacity 0.2s;
+        }
+        .operator-btn:hover { opacity: 0.8; }
+        .operator-btn:active { transform: scale(0.95); }
+    </style>
+</head>
+<body>
+
+    <!-- UI Overlay for Incorrect Answers -->
+    <div id="overlay-wrong" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
+        <div id="emoji-wrong" class="text-[150px] md:text-[250px] filter drop-shadow-2xl scale-0">❌</div>
+    </div>
+
+    <!-- TRANSITION OVERLAY BETWEEN ROUNDS -->
+    <div id="screen-transition" class="fixed inset-0 z-50 bg-[#050b14]/95 backdrop-blur-md flex-col items-center justify-center hidden">
+        <h1 id="transition-title" class="text-4xl md:text-6xl font-title font-black text-yellow-400 mb-4 animate-bounce">BABAK BERIKUTNYA</h1>
+        <p class="text-xl text-blue-200">Menyiapkan soal selanjutnya...</p>
+    </div>
+
+    <!-- MAIN GAME WRAPPER (16:9) -->
+    <div class="game-wrapper">
+        
+        <!-- INTRO SCREEN: WELCOME -->
+        <div id="screen-welcome" class="screen intro-bg active items-center justify-center">
+            <div class="max-w-3xl w-full p-8 bg-[#111a3f]/90 backdrop-blur-md rounded-3xl border-2 border-[#233560] shadow-[0_0_40px_rgba(0,0,0,0.5)] text-center z-20">
+                <!-- Logo -->
+                <img src="images%20(21)_2.jpg" onerror="this.src='https://placehold.co/180x90/111a3f/ffd700?text=FAMILY+100'" alt="Logo Family 100" class="h-20 md:h-28 w-auto object-contain mx-auto mb-4 filter drop-shadow-[0_0_15px_rgba(59,130,246,0.4)] rounded-2xl">
+                
+                <h2 class="text-xl md:text-2xl font-bold mb-4 text-blue-300 tracking-widest uppercase">Kuis Interaktif</h2>
+                <div class="bg-[#0b1437] p-3 rounded-xl border border-[#233560] mb-6 inline-block shadow-inner">
+                    <p class="text-lg md:text-xl font-bold text-yellow-400">SEJARAH INDONESIA</p>
+                    <p class="text-xs md:text-sm text-blue-200 mt-1">Perjuangan Mempertahankan Kemerdekaan & Orde Lama</p>
+                </div>
+                
+                <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                    <button onclick="showScreen('screen-rules')" class="bg-[#1e316a] hover:bg-[#2b458c] text-white border-2 border-[#3b5296] px-6 py-3 rounded-full font-black text-sm md:text-base font-title tracking-wide shadow-xl transition-colors">TUJUAN & ATURAN</button>
+                    <button onclick="showScreen('screen-login')" class="btn-gold px-8 py-3 rounded-full font-black text-sm md:text-base font-title tracking-wide shadow-2xl hover:scale-105 transition-transform">MULAI PERMAINAN ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTRO SCREEN: RULES & OBJECTIVES -->
+        <div id="screen-rules" class="screen intro-bg items-center justify-center p-6">
+            <div class="max-w-4xl w-full p-8 bg-[#111a3f]/95 backdrop-blur-md rounded-3xl border-2 border-[#233560] shadow-[0_0_40px_rgba(0,0,0,0.5)] z-20">
+                <h1 class="text-2xl md:text-3xl font-title font-black text-yellow-400 mb-6 text-center border-b border-[#233560] pb-4">TUJUAN & ATURAN PERMAINAN</h1>
+                
+                <div class="grid md:grid-cols-2 gap-6 text-left mb-8">
+                    <div class="bg-[#0b1437] p-5 rounded-2xl border border-[#233560]">
+                        <h3 class="text-lg font-bold text-blue-300 mb-2 flex items-center"><span class="text-xl mr-2">🎯</span> Tujuan Pembelajaran</h3>
+                        <ul class="list-disc list-inside space-y-2 text-blue-100 text-xs md:text-sm">
+                            <li><strong class="text-white">Kognitif:</strong> Mengidentifikasi peristiwa perjuangan fisik/diplomasi & dinamika Orde Lama.</li>
+                            <li><strong class="text-white">Afektif:</strong> Menumbuhkan nasionalisme, menghargai jasa pahlawan, & sportivitas.</li>
+                            <li><strong class="text-white">Psikomotorik:</strong> Melatih kerja sama tim, kecepatan berpikir, dan tanggap tangkas.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-[#0b1437] p-5 rounded-2xl border border-[#233560]">
+                        <h3 class="text-lg font-bold text-blue-300 mb-2 flex items-center"><span class="text-xl mr-2">📋</span> Aturan Main</h3>
+                        <ul class="list-disc list-inside space-y-2 text-blue-100 text-xs md:text-sm">
+                            <li>Terdiri dari 6 Babak (Babak 6 adalah Babak Bonus Poin Ganda).</li>
+                            <li>Skor babak terakumulasi di tengah ronde sebelum dimasukkan ke total tim saat ronde selesai.</li>
+                            <li>Maksimal <strong>3 kali salah (X)</strong> per ronde. Jika 3x salah, giliran otomatis berpindah ke tim lawan.</li>
+                            <li>Sebutkan kata kunci atau nama yang populer pada lembar jawaban.</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button onclick="showScreen('screen-login')" class="btn-gold px-10 py-3 rounded-full font-bold text-base font-title tracking-wide shadow-2xl hover:scale-105 transition-transform">LANJUT KE NAMA TIM ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTRO SCREEN: LOGIN -->
+        <div id="screen-login" class="screen intro-bg items-center justify-center">
+            <div class="max-w-2xl w-full p-8 bg-[#111a3f]/90 backdrop-blur-md rounded-3xl border-2 border-[#233560] shadow-2xl text-center z-20">
+                <h1 class="text-3xl font-title font-black text-yellow-400 mb-8 drop-shadow-md">PENGATURAN TIM</h1>
+                
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-[#0b1437] p-6 rounded-2xl border border-[#233560] shadow-inner">
+                        <label class="block text-blue-300 font-bold mb-2 tracking-widest uppercase">Nama Tim 1</label>
+                        <input type="text" id="input-team1" value="DIPONEGORO" class="w-full bg-[#1e2f5d] text-white border border-[#3b5296] rounded-lg px-4 py-3 text-center font-bold focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all uppercase text-xl">
+                    </div>
+                    <div class="bg-[#0b1437] p-6 rounded-2xl border border-[#233560] shadow-inner">
+                        <label class="block text-blue-300 font-bold mb-2 tracking-widest uppercase">Nama Tim 2</label>
+                        <input type="text" id="input-team2" value="SUDIRMAN" class="w-full bg-[#1e2f5d] text-white border border-[#3b5296] rounded-lg px-4 py-3 text-center font-bold focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all uppercase text-xl">
+                    </div>
+                </div>
+                
+                <button onclick="startGame()" class="btn-gold px-12 py-4 rounded-full font-black text-xl font-title tracking-wide w-full md:w-auto shadow-2xl hover:scale-105 transition-transform">MASUK KE ARENA ➔</button>
+            </div>
+        </div>
+
+        <!-- GAME SCREEN -->
+        <div id="screen-game" class="screen flex-col bg-transparent">
+            <!-- HEADER -->
+            <header class="flex-none p-3 md:p-4 pb-2 flex items-center gap-4 border-b border-[#233560] bg-[#08102b] z-20">
+                <img src="images%20(21)_2.jpg" onerror="this.src='https://placehold.co/120x60/111a3f/ffd700?text=FAMILY+100'" alt="Logo Family 100" class="w-14 h-10 object-contain rounded-xl shadow-md border border-[#1e316a] bg-[#050b14]">
+                <div class="flex-grow">
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-blue-400 text-xs font-bold tracking-widest uppercase">Game Belajar Interaktif - Sejarah Indonesia</h3>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs font-bold bg-[#1e2f5d] border border-[#2e427a] px-3 py-0.5 rounded-full text-yellow-300" id="progress-text">BABAK 1 DARI 6</span>
+                            <span class="text-xs font-bold bg-slate-800 border border-slate-600 px-3 py-0.5 rounded-full text-slate-300" id="overall-score-indicator">Total Tersimpan - Tim 1: 0 | Tim 2: 0</span>
+                        </div>
+                    </div>
+                    <h1 class="text-lg md:text-xl font-black text-white uppercase font-title tracking-wide mb-1.5 drop-shadow-md" id="question-text">Pertanyaan muncul di sini?</h1>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full h-1 bg-[#111a3f] rounded-full overflow-hidden border border-[#233560]">
+                        <div id="progress-bar" class="h-full bg-yellow-400 w-[16.6%] shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-all duration-500"></div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- GAME BOARD AREA -->
+            <main class="flex-grow flex p-4 md:p-6 gap-6 min-h-0 relative z-20">
+                
+                <!-- TEAM 1 PANEL -->
+                <div class="w-1/4 panel-team flex flex-col items-center justify-center p-4 relative" id="panel-team1">
+                    <div class="absolute top-4 bg-[#76601b] border border-yellow-500 text-yellow-300 text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider status-giliran shadow-md">Giliran Aktif</div>
+                    <h3 class="font-title font-bold text-lg md:text-xl text-center text-blue-300 uppercase tracking-widest mt-8 mb-2 truncate w-full px-2">TIM 1</h3>
+                    <p class="text-xs text-slate-400 font-semibold mb-1">SKOR BABAK INI</p>
+                    <div id="score-team1" class="text-5xl md:text-7xl font-black text-yellow-400 font-title mb-4 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">0</div>
+                    <div class="flex gap-2" id="strikes-team1">
+                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
+                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
+                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
+                    </div>
+                </div>
+
+                <!-- CENTER BOARD -->
+                <div class="w-2/4 bg-[#111a3f] border-2 border-[#233560] rounded-2xl p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.3)] relative">
+                    <!-- Floating Round Points -->
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black px-5 py-0.5 rounded-b-xl font-bold font-title text-sm shadow-lg">
+                        Total Poin Akumulasi: <span id="round-points" class="text-base">0</span>
+                    </div>
+
+                    <!-- Answers Container -->
+                    <div id="cards-container" class="flex-grow flex flex-col justify-center gap-2.5 overflow-y-auto pr-1 mt-2">
+                        <!-- Cards injected by JS -->
+                    </div>
+                </div>
+
+                <!-- TEAM 2 PANEL -->
+                <div class="w-1/4 panel-team flex flex-col items-center justify-center p-4 relative" id="panel-team2">
+                    <div class="absolute top-4 bg-[#76601b] border border-yellow-500 text-yellow-300 text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider status-giliran hidden shadow-md">Giliran Aktif</div>
+                    <h3 class="font-title font-bold text-lg md:text-xl text-center text-blue-300 uppercase tracking-widest mt-8 mb-2 truncate w-full px-2">TIM 2</h3>
+                    <p class="text-xs text-slate-400 font-semibold mb-1">SKOR BABAK INI</p>
+                    <div id="score-team2" class="text-5xl md:text-7xl font-black text-yellow-400 font-title mb-4 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">0</div>
+                    <div class="flex gap-2" id="strikes-team2">
+                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
+                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
+                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- OPERATOR PANEL (Bottom) -->
+            <footer class="flex-none bg-[#091129] border-t-2 border-[#1e2f5d] p-3 md:p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.5)] relative z-30">
+                <!-- Input Row -->
+                <div class="flex gap-3 mb-2.5">
+                    <input type="text" id="answer-input" placeholder="Ketik jawaban siswa di sini..." class="flex-grow bg-[#111d42] border border-[#2a3f7a] rounded-lg px-4 py-2.5 text-white font-bold text-base uppercase focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 shadow-inner" onkeypress="if(event.key === 'Enter') checkAnswer()">
+                    <button onclick="checkAnswer()" class="btn-gold px-7 py-2.5 rounded-lg font-bold text-base whitespace-nowrap shadow-lg">CEK JAWABAN</button>
+                </div>
+                
+                <!-- Controls Row -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <div class="flex bg-[#111d42] border border-[#2a3f7a] rounded-lg overflow-hidden h-[38px]">
+                        <select id="manual-reveal-select" class="bg-transparent text-white font-bold text-xs px-2 focus:outline-none appearance-none cursor-pointer border-r border-[#2a3f7a]">
+                            <option value="0">Pilihan 1</option>
+                            <option value="1">Pilihan 2</option>
+                            <option value="2">Pilihan 3</option>
+                            <option value="3">Pilihan 4</option>
+                            <option value="4">Pilihan 5</option>
+                        </select>
+                        <button onclick="revealSelectedCard()" class="operator-btn bg-green-700 hover:bg-green-600 text-white px-3 font-bold text-xs">BUKA</button>
+                    </div>
+                    
+                    <button onclick="addStrikeManual()" class="operator-btn bg-red-700 hover:bg-red-600 border border-red-500 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">SALAH / X</button>
+                    <button onclick="switchTeam()" class="operator-btn bg-[#2563eb] hover:bg-blue-500 border border-blue-400 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">GANTI TIM</button>
+                    <button onclick="resetStrikes()" class="operator-btn bg-[#334155] hover:bg-slate-600 border border-slate-500 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">RESET X</button>
+                    <button onclick="revealAllCards()" class="operator-btn bg-[#334155] hover:bg-slate-600 border border-slate-500 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">BUKA SEMUA</button>
+                    
+                    <div class="flex-grow"></div>
+                    
+                    <button onclick="nextRound()" id="btn-next-round" class="operator-btn bg-yellow-600 hover:bg-yellow-500 text-black px-5 py-2 rounded-lg font-bold text-xs shadow-md hidden animate-pulse">SOAL BERIKUTNYA ➔</button>
+                    <button onclick="location.reload()" class="operator-btn bg-[#1e293b] hover:bg-slate-700 border border-slate-600 text-white px-3 py-2 rounded-lg font-bold text-xs">RESET GAME</button>
+                </div>
+            </footer>
+        </div>
+
+        <!-- INTRO SCREEN: END GAME -->
+        <div id="screen-end" class="screen intro-bg items-center justify-center">
+            <div class="max-w-3xl w-full p-8 bg-[#111a3f]/95 backdrop-blur-xl rounded-3xl border-2 border-yellow-500 shadow-[0_0_60px_rgba(255,215,0,0.2)] text-center relative overflow-hidden z-20">
+                <h1 class="text-4xl md:text-5xl font-title font-black text-yellow-400 mb-2 animate-bounce drop-shadow-lg">SELAMAT!</h1>
+                <h2 class="text-lg text-blue-200 mb-6 tracking-widest uppercase font-bold">Pemenang Game Sejarah</h2>
+                
+                <div class="bg-gradient-to-b from-[#1e2f5d] to-[#0b1437] p-6 rounded-2xl border border-[#2a3f7a] mb-6 inline-block min-w-[280px] shadow-2xl">
+                    <div class="text-6xl mb-3 filter drop-shadow-lg">🏆</div>
+                    <h2 id="winner-name" class="text-3xl md:text-4xl font-title font-black text-white uppercase break-words drop-shadow-md">NAMA TIM</h2>
+                    <div class="mt-4 inline-block bg-yellow-500 text-black px-5 py-1.5 rounded-full font-black text-xl shadow-inner">SKOR TOTAL: <span id="winner-score">0</span></div>
+                </div>
+                <br>
+                <button onclick="location.reload()" class="btn-gold px-10 py-3 rounded-full font-black text-lg font-title tracking-wide shadow-2xl hover:scale-105 transition-transform">MAIN LAGI ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================================
+           BANK SOAL (6 BABAK: 4 dari permintaan + 1 Orde Lama + 1 Bonus Poin Ganda)
+        ========================================================================= */
+        const questionsBank = [
+            {
+                roundText: "BABAK 1: DINAMIKA ORDE LAMA",
+                question: "Peristiwa penting atau bersejarah apa yang terjadi pada masa Orde Lama (1950-1965)?",
+                answers: [
+                    { text: "KONFERENSI ASIA-AFRIKA", points: 40, keywords: ["kaa", "konferensi asia afrika", "asia afrika"] },
+                    { text: "PEMILU 1955", points: 30, keywords: ["pemilu", "pemilu 1955", "pemilu pertama"] },
+                    { text: "DEKRIT PRESIDEN", points: 15, keywords: ["dekrit", "dekrit presiden", "dekrit 5 juli"] },
+                    { text: "G30S / PKI", points: 10, keywords: ["g30s", "pki", "g30s pki", "gerakan 30 september", "gestapu"] },
+                    { text: "TRIKORA / DWIKORA", points: 5, keywords: ["trikora", "dwikora", "konfrontasi", "irian barat"] }
+                ]
+            },
+            {
+                roundText: "BABAK 2: EKONOMI ORDE LAMA",
+                question: "Sebutkan nama kebijakan sistem ekonomi yang pernah diterapkan masa Orde Lama!",
+                answers: [
+                    { text: "GUNTING SYAFRUDDIN", points: 40, keywords: ["gunting syafruddin", "syafruddin", "gunting uang"] },
+                    { text: "SISTEM ALI-BABA", points: 30, keywords: ["ali baba", "sistem ali baba", "ali-baba"] },
+                    { text: "SANERING UANG", points: 15, keywords: ["sanering", "pemotongan nilai uang", "devaluasi"] },
+                    { text: "NASIONALISASI DJB", points: 10, keywords: ["nasionalisasi", "de javasche bank", "djb"] },
+                    { text: "EKONOMI BENTENG", points: 5, keywords: ["benteng", "sistem benteng", "program benteng"] }
+                ]
+            },
+            {
+                roundText: "BABAK 3: DEKRIT PRESIDEN 1959",
+                question: "Apa saja isi atau keputusan dari Dekrit Presiden 5 Juli 1959?",
+                answers: [
+                    { text: "KEMBALI KE UUD 1945", points: 40, keywords: ["kembali ke uud 1945", "uud 1945", "uud 45"] },
+                    { text: "BUBARKAN KONSTITUANTE", points: 30, keywords: ["bubarkan konstituante", "konstituante"] },
+                    { text: "BENTUK MPRS & DPAS", points: 15, keywords: ["mprs", "dpas", "bentuk mprs"] },
+                    { text: "UUDS 1950 TIDAK BERLAKU", points: 10, keywords: ["uuds 1950", "uuds tidak berlaku"] },
+                    { text: "PEMBUBARAN KABINET", points: 5, keywords: ["pembubaran kabinet"] }
+                ]
+            },
+            {
+                roundText: "BABAK 4: PROYEK MERCUSUAR",
+                question: "Bangunan/Monumen yang dibangun pada 'Proyek Mercusuar' masa Demokrasi Terpimpin?",
+                answers: [
+                    { text: "MONAS", points: 40, keywords: ["monas", "monumen nasional"] },
+                    { text: "STADION GELORA BUNG KARNO", points: 30, keywords: ["gbk", "gelora bung karno", "senayan"] },
+                    { text: "MASJID ISTIQLAL", points: 15, keywords: ["istiqlal", "masjid istiqlal"] },
+                    { text: "HOTEL INDONESIA", points: 10, keywords: ["hotel indonesia", "hi"] },
+                    { text: "PATUNG SELAMAT DATANG", points: 5, keywords: ["patung selamat datang", "bundaran hi"] }
+                ]
+            },
+            {
+                roundText: "BABAK 5: PERJUANGAN FISIK & DIPLOMASI",
+                question: "Sebutkan nama perjanjian atau perundingan penting antara Indonesia dan Belanda dalam mempertahankan kemerdekaan!",
+                answers: [
+                    { text: "PERUNDINGAN LINGGARJATI", points: 40, keywords: ["linggarjati"] },
+                    { text: "PERJANJIAN RENVILLE", points: 30, keywords: ["renville"] },
+                    { text: "PERJANJIAN ROEM-ROYEN", points: 15, keywords: ["roem royen", "roem-royen"] },
+                    { text: "KONFERENSI MEJA BUNDAR (KMB)", points: 10, keywords: ["kmb", "konferensi meja bundar"] },
+                    { text: "PERUNDINGAN HOOGE VELUWE", points: 5, keywords: ["hooge veluwe", "hoge veluwe"] }
+                ]
+            },
+            {
+                roundText: "BABAK 6: BONUS TONGGAK SEJARAH (POIN GANDA)",
+                question: "Dokumen atau naskah penting yang menjadi landasan berdirinya negara Republik Indonesia?",
+                answers: [
+                    { text: "TEKS PROKLAMASI", points: 40, keywords: ["proklamasi", "teks proklamasi", "naskah proklamasi"] },
+                    { text: "UUD 1945", points: 30, keywords: ["uud 1945", "uud 45"] },
+                    { text: "PANCASILA", points: 15, keywords: ["pancasila"] },
+                    { text: "PIAGAM JAKARTA", points: 10, keywords: ["piagam jakarta"] },
+                    { text: "NASKAH KMB", points: 5, keywords: ["kmb", "naskah kmb"] }
+                ]
+            }
+        ];
+
+        /* =========================================================================
+           STATE & LOGIC
+        ========================================================================= */
+        let state = {
+            roundIndex: 0,
+            team1: "TIM 1",
+            team2: "TIM 2",
+            score1Total: 0,
+            score2Total: 0,
+            currentRoundScore1: 0,
+            currentRoundScore2: 0,
+            activeTeam: 1,
+            roundPoints: 0,
+            revealed: [], 
+            strikes1: 0,
+            strikes2: 0
+        };
+
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx;
+        
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playTone(freq, type, duration, vol=0.3) {
+            initAudio();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playCorrectSound() {
+            playTone(659.25, 'sine', 0.15, 0.4); 
+            setTimeout(() => playTone(880.00, 'sine', 0.4, 0.4), 100); 
+        }
+
+        function playWrongSound() {
+            playTone(150, 'sawtooth', 0.3, 0.5); 
+            setTimeout(() => playTone(100, 'sawtooth', 0.5, 0.5), 150); 
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            if (screenId === 'screen-game') {
+                document.getElementById('answer-input').focus();
+            }
+        }
+
+        function startGame() {
+            let t1 = document.getElementById('input-team1').value.trim();
+            let t2 = document.getElementById('input-team2').value.trim();
+            state.team1 = t1 || "TIM 1";
+            state.team2 = t2 || "TIM 2";
+            
+            document.querySelector('#panel-team1 h3').innerText = state.team1;
+            document.querySelector('#panel-team2 h3').innerText = state.team2;
+            
+            state.roundIndex = 0;
+            state.score1Total = 0;
+            state.score2Total = 0;
+            
+            loadRound();
+            showScreen('screen-game');
+            setActiveTeam(1);
+        }
+
+        function setActiveTeam(teamNum) {
+            state.activeTeam = teamNum;
+            
+            const p1 = document.getElementById('panel-team1');
+            const p2 = document.getElementById('panel-team2');
+            
+            p1.classList.remove('active-team');
+            p2.classList.remove('active-team');
+            p1.querySelector('.status-giliran').classList.add('hidden');
+            p2.querySelector('.status-giliran').classList.add('hidden');
+
+            if (teamNum === 1) {
+                p1.classList.add('active-team');
+                p1.querySelector('.status-giliran').classList.remove('hidden');
+            } else {
+                p2.classList.add('active-team');
+                p2.querySelector('.status-giliran').classList.remove('hidden');
+            }
+            document.getElementById('answer-input').focus();
+        }
+
+        function switchTeam() {
+            setActiveTeam(state.activeTeam === 1 ? 2 : 1);
+        }
+
+        function loadRound() {
+            const currentQ = questionsBank[state.roundIndex];
+            
+            document.getElementById('progress-text').innerText = `BABAK ${state.roundIndex + 1} DARI ${questionsBank.length}`;
+            const progressPercent = ((state.roundIndex + 1) / questionsBank.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            document.getElementById('question-text').innerText = currentQ.question;
+            
+            state.revealed = [];
+            state.roundPoints = 0;
+            state.currentRoundScore1 = 0;
+            state.currentRoundScore2 = 0;
+            updateRoundPoints();
+            updateScoresUI();
+            updateOverallIndicator();
+            
+            resetStrikes();
+            
+            document.getElementById('btn-next-round').classList.add('hidden');
+            document.getElementById('answer-input').value = '';
+
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            
+            const selectEl = document.getElementById('manual-reveal-select');
+            selectEl.innerHTML = '';
+            
+            let isBonus = (state.roundIndex === 5);
+            currentQ.answers.forEach((ans, idx) => {
+                let displayPoints = ans.points * (isBonus ? 2 : 1);
+                const cardHTML = `
+                    <div id="card-${idx}" class="answer-card flex items-center justify-between p-2.5 cursor-pointer" onclick="manualReveal(${idx})">
+                        <div class="w-8 h-8 rounded-full bg-[#08102b] flex items-center justify-center font-bold text-white text-base shadow-inner border border-[#1e2f5d]">${idx + 1}</div>
+                        <div id="card-text-${idx}" class="flex-grow text-center font-bold text-xl text-[#475569] tracking-widest uppercase px-3 truncate">?</div>
+                        <div class="w-14 text-right font-black text-blue-300 text-lg">${displayPoints}</div>
+                    </div>
+                `;
+                container.innerHTML += cardHTML;
+                selectEl.innerHTML += `<option value="${idx}">Pilihan ${idx+1}</option>`;
+            });
+        }
+
+        function updateRoundPoints() {
+            document.getElementById('round-points').innerText = state.roundPoints;
+        }
+
+        function updateScoresUI() {
+            document.getElementById('score-team1').innerText = state.currentRoundScore1;
+            document.getElementById('score-team2').innerText = state.currentRoundScore2;
+        }
+
+        function updateOverallIndicator() {
+            document.getElementById('overall-score-indicator').innerText = `Total Tersimpan - ${state.team1}: ${state.score1Total} | ${state.team2}: ${state.score2Total}`;
+        }
+
+        function addScoreToActiveTeam(points) {
+            let isBonus = (state.roundIndex === 5);
+            let finalPoints = points * (isBonus ? 2 : 1);
+
+            if (state.activeTeam === 1) {
+                state.currentRoundScore1 += finalPoints;
+            } else {
+                state.currentRoundScore2 += finalPoints;
+            }
+            updateScoresUI();
+        }
+
+        function commitRoundScores() {
+            state.score1Total += state.currentRoundScore1;
+            state.score2Total += state.currentRoundScore2;
+            updateOverallIndicator();
+        }
+
+        function resetStrikes() {
+            state.strikes1 = 0;
+            state.strikes2 = 0;
+            updateStrikesUI(1);
+            updateStrikesUI(2);
+        }
+
+        function updateStrikesUI(teamNum) {
+            let strikesCount = teamNum === 1 ? state.strikes1 : state.strikes2;
+            let container = document.getElementById(`strikes-team${teamNum}`);
+            let xMarks = container.querySelectorAll('.strike-x');
+            
+            xMarks.forEach((x, idx) => {
+                if (idx < strikesCount) {
+                    x.classList.add('active');
+                } else {
+                    x.classList.remove('active');
+                }
+            });
+        }
+
+        function checkAnswer() {
+            initAudio(); 
+            const inputEl = document.getElementById('answer-input');
+            const answerRaw = inputEl.value.trim().toLowerCase();
+            
+            if (!answerRaw) return;
+
+            const currentQ = questionsBank[state.roundIndex];
+            let foundIndex = -1;
+
+            for (let i = 0; i < currentQ.answers.length; i++) {
+                if (state.revealed.includes(i)) continue;
+                
+                const keywords = currentQ.answers[i].keywords;
+                const isMatch = keywords.some(kw => 
+                    answerRaw.includes(kw.toLowerCase()) || 
+                    kw.toLowerCase().includes(answerRaw) && answerRaw.length > 3
+                );
+
+                if (isMatch || answerRaw === currentQ.answers[i].text.toLowerCase()) {
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            inputEl.value = ''; 
+
+            if (foundIndex !== -1) {
+                triggerCorrect(foundIndex, currentQ.answers[foundIndex].points);
+            } else {
+                triggerWrong();
+            }
+            inputEl.focus();
+        }
+
+        function triggerCorrect(index, points) {
+            if(state.revealed.includes(index)) return;
+
+            state.revealed.push(index);
+            let isBonus = (state.roundIndex === 5);
+            let mult = isBonus ? 2 : 1;
+            state.roundPoints += (points * mult);
+            updateRoundPoints();
+            
+            addScoreToActiveTeam(points);
+            
+            revealCardUI(index);
+            
+            playCorrectSound();
+            confetti({
+                particleCount: 50,
+                spread: 60,
+                origin: { y: 0.6 },
+                colors: ['#FFD700', '#3B82F6', '#FFFFFF']
+            });
+
+            checkRoundComplete();
+        }
+
+        function revealCardUI(index) {
+            const currentQ = questionsBank[state.roundIndex];
+            const card = document.getElementById(`card-${index}`);
+            const textEl = document.getElementById(`card-text-${index}`);
+            
+            card.classList.add('revealed');
+            textEl.innerText = currentQ.answers[index].text;
+            textEl.classList.remove('text-[#475569]');
+            textEl.classList.add('text-white');
+            
+            card.children[0].classList.replace('bg-[#08102b]', 'bg-blue-800');
+            card.children[0].classList.replace('border-[#1e2f5d]', 'border-blue-400');
+            card.children[2].classList.replace('text-blue-300', 'text-yellow-300');
+        }
+
+        function triggerWrong() {
+            playWrongSound();
+            
+            let currentStrikes = 0;
+
+            if (state.activeTeam === 1) {
+                state.strikes1++;
+                if (state.strikes1 > 3) state.strikes1 = 3;
+                updateStrikesUI(1);
+                currentStrikes = state.strikes1;
+            } else {
+                state.strikes2++;
+                if (state.strikes2 > 3) state.strikes2 = 3;
+                updateStrikesUI(2);
+                currentStrikes = state.strikes2;
+            }
+
+            const overlay = document.getElementById('overlay-wrong');
+            const emoji = document.getElementById('emoji-wrong');
+            
+            overlay.classList.remove('opacity-0');
+            overlay.classList.add('opacity-100');
+            emoji.classList.remove('scale-0');
+            emoji.classList.add('animate-pop');
+
+            setTimeout(() => {
+                overlay.classList.remove('opacity-100');
+                overlay.classList.add('opacity-0');
+                emoji.classList.remove('animate-pop');
+                emoji.classList.add('scale-0');
+                
+                // Automatic switch team when 3 strikes reached
+                if (currentStrikes === 3) {
+                    setTimeout(() => {
+                        switchTeam();
+                    }, 300);
+                }
+            }, 1000);
+        }
+
+        function addStrikeManual() {
+            triggerWrong();
+        }
+
+        function manualReveal(index) {
+            if (!state.revealed.includes(index)) {
+                state.revealed.push(index);
+                let isBonus = (state.roundIndex === 5);
+                let mult = isBonus ? 2 : 1;
+                state.roundPoints += (questionsBank[state.roundIndex].answers[index].points * mult);
+                updateRoundPoints();
+                addScoreToActiveTeam(questionsBank[state.roundIndex].answers[index].points);
+                revealCardUI(index);
+                playCorrectSound();
+                checkRoundComplete();
+            }
+        }
+
+        function revealSelectedCard() {
+            const selectEl = document.getElementById('manual-reveal-select');
+            const idx = parseInt(selectEl.value);
+            if(!isNaN(idx)) {
+                manualReveal(idx);
+            }
+        }
+
+        function revealAllCards() {
+            const currentQ = questionsBank[state.roundIndex];
+            currentQ.answers.forEach((_, idx) => {
+                if (!state.revealed.includes(idx)) {
+                    state.revealed.push(idx);
+                    revealCardUI(idx);
+                }
+            });
+            checkRoundComplete();
+        }
+
+        function checkRoundComplete() {
+            const currentQ = questionsBank[state.roundIndex];
+            if (state.revealed.length === currentQ.answers.length) {
+                commitRoundScores();
+                document.getElementById('btn-next-round').classList.remove('hidden');
+                
+                // Automatic transition after 3 seconds
+                setTimeout(() => {
+                    showTransitionAndNext();
+                }, 3000);
+            }
+        }
+
+        function showTransitionAndNext() {
+            state.roundIndex++;
+            if (state.roundIndex >= questionsBank.length) {
+                endGame();
+            } else {
+                const transOverlay = document.getElementById('screen-transition');
+                const transTitle = document.getElementById('transition-title');
+                transTitle.innerText = `BABAK ${state.roundIndex + 1}`;
+                transOverlay.classList.remove('hidden');
+                transOverlay.classList.add('flex');
+
+                setTimeout(() => {
+                    transOverlay.classList.remove('flex');
+                    transOverlay.classList.add('hidden');
+                    loadRound();
+                }, 2000);
+            }
+        }
+
+        function nextRound() {
+            showTransitionAndNext();
+        }
+
+        function endGame() {
+            showScreen('screen-end');
+            
+            let winner = state.score1Total >= state.score2Total ? state.team1 : state.team2;
+            let winScore = state.score1Total >= state.score2Total ? state.score1Total : state.score2Total;
+            if (state.score1Total === state.score2Total) winner = "SERI (DRAW)";
+
+            document.getElementById('winner-name').innerText = winner;
+            document.getElementById('winner-score').innerText = winScore;
+            
+            var duration = 3 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
+
+            var interval = setInterval(function() {
+                var timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                var particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    </script>
+</body>
+</html>
