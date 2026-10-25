@@ -8,95 +8,121 @@
     Nama: FAMILY 100 ANAK PINTAR
     Mata Pelajaran: Sejarah
     Kelas: XII SIJA 1
-    Materi: Perjuangan Mempertahankan Kemerdekaan & Dinamika Orde Lama
+    Materi: Perjuangan Mempertahankan Kemerdekaan & Orde Lama
     -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@400;600&display=swap');
 
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #050b14;
+            background: radial-gradient(circle at center, #2563eb 0%, #1d4ed8 50%, #1e3a8a 100%);
             color: #ffffff;
+            overflow: hidden;
             margin: 0;
-            padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            overflow: hidden;
         }
 
         h1, h2, h3, .font-title {
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* 16:9 Aspect Ratio Container */
+        /* 16:9 Aspect Ratio Container for Desktop/Projector */
         .game-wrapper {
             width: 100vw;
-            max-width: 1920px;
-            aspect-ratio: 16 / 9;
-            background: linear-gradient(135deg, #0b1437 0%, #060b1e 100%);
+            height: 100vh;
+            max-width: 1777.78vh;
+            max-height: 56.25vw;
             position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
             display: flex;
+            flex-direction: column;
             overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            border: 4px solid #3b82f6;
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
         }
 
-        .screen {
-            display: none;
+        /* TV Scanline effect overlay */
+        .scanlines {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.05) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .gold-border {
+            border: 2px solid #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+        
+        .gold-text {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #FFD700 0%, #B8860B 100%);
+            color: #0f172a;
+            border: none;
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        .btn-gold:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+        }
+        .btn-gold:active {
+            transform: scale(0.95);
+        }
+
+        /* Flip Card Animations */
+        .flip-card {
+            background-color: transparent;
+            width: 100%;
+            height: 48px;
+            perspective: 1000px;
+            margin-bottom: 8px;
+        }
+        .flip-card-inner {
+            position: relative;
             width: 100%;
             height: 100%;
-            flex-direction: column;
-            position: absolute;
-            top: 0; left: 0;
-            z-index: 10;
-        }
-        .screen.active { 
-            display: flex; 
-        }
-        .intro-bg {
-            background: radial-gradient(circle at center, #112240 0%, #050b14 100%);
-        }
-
-        .panel-team {
-            background-color: #111a3f;
-            border: 2px solid #233560;
-            border-radius: 16px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
-        }
-
-        .panel-team.active-team {
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 20px rgba(0,0,0,0.5);
-        }
-
-        .answer-card {
-            background-color: #1e316a;
-            border: 2px solid #2b458c;
-            border-radius: 12px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
             transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateX(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-
-        .answer-card.revealed {
-            background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
-            border-color: #60a5fa;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-            transform: scale(1.02);
+        .flip-card-front {
+            background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+            border: 2px solid #60a5fa;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
         }
-
-        .strike-x {
-            color: #2c3e50;
-            text-shadow: 1px 1px 2px #000;
-            transition: color 0.3s;
-        }
-        .strike-x.active {
-            color: #ef4444;
-            text-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 2px 2px 0px #000;
+        .flip-card-back {
+            background: linear-gradient(180deg, #059669 0%, #047857 100%);
+            border: 2px solid #34d399;
+            transform: rotateX(180deg);
+            padding: 0 15px;
+            justify-content: space-between;
         }
 
         @keyframes popIn {
@@ -109,322 +135,314 @@
         #overlay-wrong {
             pointer-events: none;
             background: rgba(220, 38, 38, 0.3);
-            backdrop-filter: blur(4px);
             transition: opacity 0.3s;
         }
 
-        .btn-gold {
-            background: linear-gradient(180deg, #ffe066 0%, #f59e0b 100%);
-            color: #451a03;
-            border: 2px solid #fbbf24;
-            text-transform: uppercase;
-            box-shadow: 0 4px 0 #b45309;
-            transition: all 0.1s;
+        .strike-x {
+            color: #475569;
+            transition: color 0.3s;
         }
-        .btn-gold:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #b45309;
+        .strike-x.active {
+            color: #ef4444;
+            text-shadow: 0 0 12px rgba(239, 68, 68, 0.9);
         }
-        
-        .operator-btn {
-            transition: opacity 0.2s;
+
+        .screen { display: none; z-index: 10; position: absolute; inset: 0; flex-direction: column; overflow-y: auto; }
+        .screen.active { display: flex; }
+
+        /* Landscape Warning Overlay for Mobile Portrait */
+        #landscape-warning {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #1d4ed8;
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
         }
-        .operator-btn:hover { opacity: 0.8; }
-        .operator-btn:active { transform: scale(0.95); }
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            #landscape-warning {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <!-- UI Overlay for Incorrect Answers -->
-    <div id="overlay-wrong" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none">
-        <div id="emoji-wrong" class="text-[150px] md:text-[250px] filter drop-shadow-2xl scale-0">❌</div>
+    <!-- Landscape Warning for Mobile -->
+    <div id="landscape-warning">
+        <div class="text-6xl mb-4 animate-bounce">📱🔄</div>
+        <h2 class="text-2xl font-bold font-title text-yellow-400 mb-2">Mohon Putar Perangkat Anda</h2>
+        <p class="text-gray-200 text-sm">Game ini dirancang dalam mode mendatar (landscape) untuk pengalaman bermain terbaik.</p>
     </div>
 
-    <!-- TRANSITION OVERLAY BETWEEN ROUNDS -->
-    <div id="screen-transition" class="fixed inset-0 z-50 bg-[#050b14]/95 backdrop-blur-md flex-col items-center justify-center hidden">
-        <h1 id="transition-title" class="text-4xl md:text-6xl font-title font-black text-yellow-400 mb-4 animate-bounce">BABAK BERIKUTNYA</h1>
-        <p class="text-xl text-blue-200">Menyiapkan soal selanjutnya...</p>
-    </div>
-
-    <!-- MAIN GAME WRAPPER (16:9) -->
     <div class="game-wrapper">
-        
-        <!-- INTRO SCREEN: WELCOME -->
-        <div id="screen-welcome" class="screen intro-bg active items-center justify-center">
-            <div class="max-w-3xl w-full p-8 bg-[#111a3f]/90 backdrop-blur-md rounded-3xl border-2 border-[#233560] shadow-[0_0_40px_rgba(0,0,0,0.5)] text-center z-20">
-                <!-- Logo -->
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWqnxYuSpZYKFcI6Apz8AFPn9F3uazLejFJCdBpeoqJA&s" onerror="this.src='https://placehold.co/180x90/111a3f/ffd700?text=FAMILY+100'" alt="Logo Family 100" class="h-20 md:h-28 w-auto object-contain mx-auto mb-4 filter drop-shadow-[0_0_15px_rgba(59,130,246,0.4)] rounded-2xl">
-                
-                <h2 class="text-xl md:text-2xl font-bold mb-4 text-blue-300 tracking-widest uppercase">Kuis Interaktif</h2>
-                <div class="bg-[#0b1437] p-3 rounded-xl border border-[#233560] mb-6 inline-block shadow-inner">
-                    <p class="text-lg md:text-xl font-bold text-yellow-400">SEJARAH INDONESIA</p>
+        <div class="scanlines"></div>
+
+        <!-- UI Overlay for Incorrect Answers -->
+        <div id="overlay-wrong" class="fixed inset-0 z-50 flex items-center justify-center opacity-0">
+            <div id="emoji-wrong" class="text-[150px] filter drop-shadow-2xl scale-0">😭</div>
+        </div>
+
+        <!-- TRANSITION SCREEN BETWEEN ROUNDS -->
+        <div id="screen-transition" class="screen items-center justify-center bg-blue-950/95 z-40 hidden">
+            <div class="text-center p-6 animate-pop">
+                <div id="trans-msg-1" class="text-3xl md:text-4xl font-extrabold text-yellow-300 mb-2">BABAK 1 SELESAI!</div>
+                <div id="trans-msg-2" class="text-lg md:text-xl text-blue-200 mb-6">Melanjutkan ke babak berikutnya...</div>
+                <h1 id="transition-title" class="text-5xl md:text-7xl font-title font-black gold-text tracking-wider">BABAK 2 DIMULAI</h1>
+            </div>
+        </div>
+
+        <!-- SCREEN 1: WELCOME -->
+        <div id="screen-welcome" class="screen active items-center justify-center text-center p-6">
+            <div class="max-w-3xl w-full p-8 bg-blue-900/80 backdrop-blur-md rounded-3xl gold-border shadow-2xl my-auto">
+                <div class="flex justify-center mb-4">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-tV72nn7YDdADLBL9Z0gtg8tyaCjuFafja8sFyl4qnQ&s=10" alt="Logo Family 100" class="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(255,215,0,0.5)]" onerror="this.src='https://via.placeholder.com/80?text=F100'">
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold mb-1 text-blue-200">KUIS INTERAKTIF</h2>
+                <h1 class="text-4xl md:text-6xl font-title font-black gold-text mb-3 tracking-wider">FAMILY 100</h1>
+                <div class="bg-blue-950/60 p-3 rounded-xl border border-blue-400 mb-6 inline-block">
+                    <p class="text-lg md:text-xl font-semibold text-white">SEJARAH INDONESIA</p>
                     <p class="text-xs md:text-sm text-blue-200 mt-1">Perjuangan Mempertahankan Kemerdekaan & Orde Lama</p>
                 </div>
-                
-                <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-                    <button onclick="showScreen('screen-rules')" class="bg-[#1e316a] hover:bg-[#2b458c] text-white border-2 border-[#3b5296] px-6 py-3 rounded-full font-black text-sm md:text-base font-title tracking-wide shadow-xl transition-colors">TUJUAN & ATURAN</button>
-                    <button onclick="showScreen('screen-login')" class="btn-gold px-8 py-3 rounded-full font-black text-sm md:text-base font-title tracking-wide shadow-2xl hover:scale-105 transition-transform">MULAI PERMAINAN ➔</button>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button onclick="showScreen('screen-rules')" class="px-6 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-full font-bold text-base border border-blue-400 transition-colors shadow-lg">TUJUAN & ATURAN</button>
+                    <button onclick="showScreen('screen-login')" class="px-8 py-3 btn-gold rounded-full font-bold text-base font-title tracking-wide shadow-lg">MULAI GAME ➔</button>
                 </div>
             </div>
         </div>
 
-        <!-- INTRO SCREEN: RULES & OBJECTIVES -->
-        <div id="screen-rules" class="screen intro-bg items-center justify-center p-6">
-            <div class="max-w-4xl w-full p-8 bg-[#111a3f]/95 backdrop-blur-md rounded-3xl border-2 border-[#233560] shadow-[0_0_40px_rgba(0,0,0,0.5)] z-20">
-                <h1 class="text-2xl md:text-3xl font-title font-black text-yellow-400 mb-6 text-center border-b border-[#233560] pb-4">TUJUAN & ATURAN PERMAINAN</h1>
+        <!-- SCREEN 2: RULES / TUJUAN -->
+        <div id="screen-rules" class="screen p-6 items-center justify-center">
+            <div class="max-w-4xl w-full p-6 bg-blue-900/90 backdrop-blur-md rounded-3xl gold-border shadow-2xl my-auto">
+                <h1 class="text-2xl md:text-3xl font-title font-black gold-text mb-4 text-center border-b border-yellow-600/50 pb-3">TUJUAN & ATURAN MAIN</h1>
                 
-                <div class="grid md:grid-cols-2 gap-6 text-left mb-8">
-                    <div class="bg-[#0b1437] p-5 rounded-2xl border border-[#233560]">
-                        <h3 class="text-lg font-bold text-blue-300 mb-2 flex items-center"><span class="text-xl mr-2">🎯</span> Tujuan Pembelajaran</h3>
-                        <ul class="list-disc list-inside space-y-2 text-blue-100 text-xs md:text-sm">
-                            <li><strong class="text-white">Kognitif:</strong> Mengidentifikasi peristiwa perjuangan fisik/diplomasi & dinamika Orde Lama.</li>
-                            <li><strong class="text-white">Afektif:</strong> Menumbuhkan nasionalisme, menghargai jasa pahlawan, & sportivitas.</li>
-                            <li><strong class="text-white">Psikomotorik:</strong> Melatih kerja sama tim, kecepatan berpikir, dan tanggap tangkas.</li>
+                <div class="grid md:grid-cols-2 gap-6 text-left mb-6 text-sm md:text-base">
+                    <div>
+                        <h3 class="text-lg font-bold text-yellow-300 mb-2 flex items-center"><span class="text-xl mr-2">🎯</span> Tujuan Pembelajaran</h3>
+                        <ul class="list-disc list-inside space-y-1 text-gray-200">
+                            <li><strong class="text-white">Kognitif:</strong> Mengidentifikasi peristiwa sejarah kemerdekaan & Orde Lama.</li>
+                            <li><strong class="text-white">Afektif:</strong> Menumbuhkan nasionalisme & sportivitas.</li>
+                            <li><strong class="text-white">Psikomotorik:</strong> Melatih kerja sama tim & ketangkasan.</li>
                         </ul>
                     </div>
-                    <div class="bg-[#0b1437] p-5 rounded-2xl border border-[#233560]">
-                        <h3 class="text-lg font-bold text-blue-300 mb-2 flex items-center"><span class="text-xl mr-2">📋</span> Aturan Main</h3>
-                        <ul class="list-disc list-inside space-y-2 text-blue-100 text-xs md:text-sm">
-                            <li>Terdiri dari 6 Babak (Babak 6 adalah Babak Bonus Poin Ganda).</li>
-                            <li>Skor babak terakumulasi di tengah ronde sebelum dimasukkan ke total tim saat ronde selesai.</li>
-                            <li>Maksimal <strong>3 kali salah (X)</strong> per ronde. Jika 3x salah, giliran otomatis berpindah ke tim lawan.</li>
-                            <li>Sebutkan kata kunci atau nama yang populer pada lembar jawaban.</li>
+                    <div>
+                        <h3 class="text-lg font-bold text-yellow-300 mb-2 flex items-center"><span class="text-xl mr-2">📋</span> Aturan Permainan</h3>
+                        <ul class="list-disc list-inside space-y-1 text-gray-200">
+                            <li>Terdiri dari 5 Babak Utama (Total 1000 Poin) + 1 Babak Bonus.</li>
+                            <li>Maksimal <strong>3 kali salah (X)</strong>, jika 3x salah giliran otomatis berpindah ke tim lawan.</li>
+                            <li>Semua kartu terbuka ➔ Jeda 5 detik ➔ Transisi babak otomatis selama 2 detik.</li>
                         </ul>
                     </div>
                 </div>
                 
                 <div class="text-center">
-                    <button onclick="showScreen('screen-login')" class="btn-gold px-10 py-3 rounded-full font-bold text-base font-title tracking-wide shadow-2xl hover:scale-105 transition-transform">LANJUT KE NAMA TIM ➔</button>
+                    <button onclick="showScreen('screen-welcome')" class="px-8 py-2.5 btn-gold rounded-full font-bold text-base font-title tracking-wide shadow-lg">KEMBALI</button>
                 </div>
             </div>
         </div>
 
-        <!-- INTRO SCREEN: LOGIN -->
-        <div id="screen-login" class="screen intro-bg items-center justify-center">
-            <div class="max-w-2xl w-full p-8 bg-[#111a3f]/90 backdrop-blur-md rounded-3xl border-2 border-[#233560] shadow-2xl text-center z-20">
-                <h1 class="text-3xl font-title font-black text-yellow-400 mb-8 drop-shadow-md">PENGATURAN TIM</h1>
+        <!-- SCREEN 3: LOGIN TEAM -->
+        <div id="screen-login" class="screen p-6 items-center justify-center">
+            <div class="max-w-xl w-full p-6 bg-blue-900/90 backdrop-blur-md rounded-3xl gold-border shadow-2xl text-center my-auto">
+                <h1 class="text-2xl font-title font-black gold-text mb-6">MASUKKAN NAMA TIM</h1>
                 
-                <div class="grid md:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-[#0b1437] p-6 rounded-2xl border border-[#233560] shadow-inner">
-                        <label class="block text-blue-300 font-bold mb-2 tracking-widest uppercase">Nama Tim 1</label>
-                        <input type="text" id="input-team1" value="DIPONEGORO" class="w-full bg-[#1e2f5d] text-white border border-[#3b5296] rounded-lg px-4 py-3 text-center font-bold focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all uppercase text-xl">
+                <div class="grid md:grid-cols-2 gap-4 mb-6">
+                    <div class="bg-blue-950/60 p-4 rounded-2xl border border-blue-400/50">
+                        <label class="block text-blue-200 font-bold mb-2 text-sm">TIM 1</label>
+                        <input type="text" id="input-team1" value="Nama Tim A" class="w-full bg-blue-900 text-white border border-blue-400 rounded-lg px-3 py-2 text-center font-bold focus:outline-none focus:border-yellow-400 uppercase text-sm">
                     </div>
-                    <div class="bg-[#0b1437] p-6 rounded-2xl border border-[#233560] shadow-inner">
-                        <label class="block text-blue-300 font-bold mb-2 tracking-widest uppercase">Nama Tim 2</label>
-                        <input type="text" id="input-team2" value="SUDIRMAN" class="w-full bg-[#1e2f5d] text-white border border-[#3b5296] rounded-lg px-4 py-3 text-center font-bold focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 transition-all uppercase text-xl">
+                    <div class="bg-blue-950/60 p-4 rounded-2xl border border-blue-400/50">
+                        <label class="block text-blue-200 font-bold mb-2 text-sm">TIM 2</label>
+                        <input type="text" id="input-team2" value="Nama Tim B" class="w-full bg-blue-900 text-white border border-blue-400 rounded-lg px-3 py-2 text-center font-bold focus:outline-none focus:border-yellow-400 uppercase text-sm">
                     </div>
                 </div>
                 
-                <button onclick="startGame()" class="btn-gold px-12 py-4 rounded-full font-black text-xl font-title tracking-wide w-full md:w-auto shadow-2xl hover:scale-105 transition-transform">MASUK KE ARENA ➔</button>
+                <button onclick="startGame()" class="px-10 py-3 btn-gold rounded-full font-bold text-lg font-title tracking-wide shadow-lg">MULAI GAME ➔</button>
             </div>
         </div>
 
-        <!-- GAME SCREEN -->
-        <div id="screen-game" class="screen flex-col bg-transparent">
-            <!-- HEADER -->
-            <header class="flex-none p-3 md:p-4 pb-2 flex items-center gap-4 border-b border-[#233560] bg-[#08102b] z-20">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQWqnxYuSpZYKFcI6Apz8AFPn9F3uazLejFJCdBpeoqJA&s" onerror="this.src='https://placehold.co/120x60/111a3f/ffd700?text=FAMILY+100'" alt="Logo Family 100" class="w-14 h-10 object-contain rounded-xl shadow-md border border-[#1e316a] bg-[#050b14]">
-                <div class="flex-grow">
-                    <div class="flex items-center justify-between mb-1">
-                        <h3 class="text-blue-400 text-xs font-bold tracking-widest uppercase">Game Belajar Interaktif - Sejarah Indonesia</h3>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs font-bold bg-[#1e2f5d] border border-[#2e427a] px-3 py-0.5 rounded-full text-yellow-300" id="progress-text">BABAK 1 DARI 6</span>
-                            <span class="text-xs font-bold bg-slate-800 border border-slate-600 px-3 py-0.5 rounded-full text-slate-300" id="overall-score-indicator">Total Tersimpan - Tim 1: 0 | Tim 2: 0</span>
-                        </div>
-                    </div>
-                    <h1 class="text-lg md:text-xl font-black text-white uppercase font-title tracking-wide mb-1.5 drop-shadow-md" id="question-text">Pertanyaan muncul di sini?</h1>
-                    
-                    <!-- Progress Bar -->
-                    <div class="w-full h-1 bg-[#111a3f] rounded-full overflow-hidden border border-[#233560]">
-                        <div id="progress-bar" class="h-full bg-yellow-400 w-[16.6%] shadow-[0_0_10px_rgba(255,215,0,0.5)] transition-all duration-500"></div>
-                    </div>
-                </div>
-            </header>
+        <!-- SCREEN 4: GAME BOARD -->
+        <div id="screen-game" class="screen p-4 justify-between">
+            <!-- Header -->
+            <div class="text-center">
+                <div class="inline-block bg-yellow-500 text-black px-4 py-0.5 rounded-full font-bold mb-1 font-title tracking-widest text-xs shadow" id="round-indicator">BABAK 1</div>
+                <h2 id="question-text" class="text-lg md:text-xl font-bold text-white drop-shadow-md px-4 leading-snug">Pertanyaan akan muncul di sini...</h2>
+            </div>
 
-            <!-- GAME BOARD AREA -->
-            <main class="flex-grow flex p-4 md:p-6 gap-6 min-h-0 relative z-20">
+            <div class="flex flex-col lg:flex-row gap-4 items-center justify-center my-auto w-full max-w-6xl mx-auto">
                 
-                <!-- TEAM 1 PANEL -->
-                <div class="w-1/4 panel-team flex flex-col items-center justify-center p-4 relative" id="panel-team1">
-                    <div class="absolute top-4 bg-[#76601b] border border-yellow-500 text-yellow-300 text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider status-giliran shadow-md">Giliran Aktif</div>
-                    <h3 class="font-title font-bold text-lg md:text-xl text-center text-blue-300 uppercase tracking-widest mt-8 mb-2 truncate w-full px-2">TIM 1</h3>
-                    <p class="text-xs text-slate-400 font-semibold mb-1">SKOR BABAK INI</p>
-                    <div id="score-team1" class="text-5xl md:text-7xl font-black text-yellow-400 font-title mb-4 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">0</div>
-                    <div class="flex gap-2" id="strikes-team1">
-                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
-                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
-                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
+                <!-- Left Score (Team 1) -->
+                <div id="panel-team1" class="w-full lg:w-1/4 bg-blue-900/90 rounded-2xl gold-border p-3 flex flex-col items-center transition-all opacity-50 shadow-lg">
+                    <div class="bg-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 uppercase tracking-wide status-giliran hidden shadow">Giliran Aktif</div>
+                    <h3 id="display-team1" class="font-title font-bold text-base text-center truncate text-blue-200 w-full">TIM 1</h3>
+                    <!-- Overall Total Score -->
+                    <div class="text-xs text-yellow-300 font-semibold mt-1">Total: <span id="overall-score1" class="font-bold">0</span></div>
+                    <div class="flex gap-1.5 my-1" id="strikes-team1">
+                        <span class="text-2xl font-black strike-x">X</span>
+                        <span class="text-2xl font-black strike-x">X</span>
+                        <span class="text-2xl font-black strike-x">X</span>
+                    </div>
+                    <button onclick="setActiveTeam(1)" class="text-[10px] bg-blue-700 hover:bg-blue-600 px-2 py-0.5 rounded w-full border border-blue-400 shadow">Pilih Tim</button>
+                </div>
+
+                <!-- Center Board (Cards & Input) -->
+                <div class="w-full lg:w-2/4 flex flex-col items-center gap-3 relative">
+                    <!-- Round Score Accumulator Badge -->
+                    <div class="absolute -top-3 right-0 bg-blue-800 border border-yellow-400 text-yellow-400 px-3 py-0.5 rounded-bl-xl font-bold text-xs font-title shadow-lg">
+                        Poin Ronde: <span id="round-points">0</span>
+                    </div>
+
+                    <!-- Answer Cards Container -->
+                    <div id="cards-container" class="w-full flex flex-col gap-1.5 mt-2">
+                        <!-- Injected via JS -->
+                    </div>
+
+                    <!-- Input Area -->
+                    <div class="w-full bg-blue-900/90 p-3 rounded-xl border border-blue-500 flex gap-2 shadow-lg">
+                        <input type="text" id="answer-input" placeholder="Ketik jawaban siswa di sini..." class="flex-grow bg-blue-950 text-white border border-blue-400 rounded-lg px-3 py-2 font-bold focus:outline-none focus:border-yellow-400 text-sm uppercase" onkeypress="if(event.key === 'Enter') checkAnswer()">
+                        <button onclick="checkAnswer()" class="px-4 py-2 btn-gold rounded-lg font-bold text-sm whitespace-nowrap shadow">CEK</button>
                     </div>
                 </div>
 
-                <!-- CENTER BOARD -->
-                <div class="w-2/4 bg-[#111a3f] border-2 border-[#233560] rounded-2xl p-5 flex flex-col shadow-[0_0_30px_rgba(0,0,0,0.3)] relative">
-                    <!-- Floating Round Points -->
-                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black px-5 py-0.5 rounded-b-xl font-bold font-title text-sm shadow-lg">
-                        Total Poin Akumulasi: <span id="round-points" class="text-base">0</span>
+                <!-- Right Score (Team 2) -->
+                <div id="panel-team2" class="w-full lg:w-1/4 bg-blue-900/90 rounded-2xl gold-border p-3 flex flex-col items-center transition-all opacity-50 shadow-lg">
+                    <div class="bg-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full mb-1 uppercase tracking-wide status-giliran hidden shadow">Giliran Aktif</div>
+                    <h3 id="display-team2" class="font-title font-bold text-base text-center truncate text-blue-200 w-full">TIM 2</h3>
+                    <!-- Overall Total Score -->
+                    <div class="text-xs text-yellow-300 font-semibold mt-1">Total: <span id="overall-score2" class="font-bold">0</span></div>
+                    <div class="flex gap-1.5 my-1" id="strikes-team2">
+                        <span class="text-2xl font-black strike-x">X</span>
+                        <span class="text-2xl font-black strike-x">X</span>
+                        <span class="text-2xl font-black strike-x">X</span>
                     </div>
-
-                    <!-- Answers Container -->
-                    <div id="cards-container" class="flex-grow flex flex-col justify-center gap-2.5 overflow-y-auto pr-1 mt-2">
-                        <!-- Cards injected by JS -->
-                    </div>
+                    <button onclick="setActiveTeam(2)" class="text-[10px] bg-blue-700 hover:bg-blue-600 px-2 py-0.5 rounded w-full border border-blue-400 shadow">Pilih Tim</button>
                 </div>
+            </div>
 
-                <!-- TEAM 2 PANEL -->
-                <div class="w-1/4 panel-team flex flex-col items-center justify-center p-4 relative" id="panel-team2">
-                    <div class="absolute top-4 bg-[#76601b] border border-yellow-500 text-yellow-300 text-[10px] md:text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider status-giliran hidden shadow-md">Giliran Aktif</div>
-                    <h3 class="font-title font-bold text-lg md:text-xl text-center text-blue-300 uppercase tracking-widest mt-8 mb-2 truncate w-full px-2">TIM 2</h3>
-                    <p class="text-xs text-slate-400 font-semibold mb-1">SKOR BABAK INI</p>
-                    <div id="score-team2" class="text-5xl md:text-7xl font-black text-yellow-400 font-title mb-4 drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)]">0</div>
-                    <div class="flex gap-2" id="strikes-team2">
-                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
-                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
-                        <span class="text-3xl md:text-4xl font-black strike-x">X</span>
-                    </div>
-                </div>
-
-            </main>
-
-            <!-- OPERATOR PANEL (Bottom) -->
-            <footer class="flex-none bg-[#091129] border-t-2 border-[#1e2f5d] p-3 md:p-4 shadow-[0_-10px_20px_rgba(0,0,0,0.5)] relative z-30">
-                <!-- Input Row -->
-                <div class="flex gap-3 mb-2.5">
-                    <input type="text" id="answer-input" placeholder="Ketik jawaban siswa di sini..." class="flex-grow bg-[#111d42] border border-[#2a3f7a] rounded-lg px-4 py-2.5 text-white font-bold text-base uppercase focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400 shadow-inner" onkeypress="if(event.key === 'Enter') checkAnswer()">
-                    <button onclick="checkAnswer()" class="btn-gold px-7 py-2.5 rounded-lg font-bold text-base whitespace-nowrap shadow-lg">CEK JAWABAN</button>
-                </div>
-                
-                <!-- Controls Row -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <div class="flex bg-[#111d42] border border-[#2a3f7a] rounded-lg overflow-hidden h-[38px]">
-                        <select id="manual-reveal-select" class="bg-transparent text-white font-bold text-xs px-2 focus:outline-none appearance-none cursor-pointer border-r border-[#2a3f7a]">
-                            <option value="0">Pilihan 1</option>
-                            <option value="1">Pilihan 2</option>
-                            <option value="2">Pilihan 3</option>
-                            <option value="3">Pilihan 4</option>
-                            <option value="4">Pilihan 5</option>
-                        </select>
-                        <button onclick="revealSelectedCard()" class="operator-btn bg-green-700 hover:bg-green-600 text-white px-3 font-bold text-xs">BUKA</button>
-                    </div>
-                    
-                    <button onclick="addStrikeManual()" class="operator-btn bg-red-700 hover:bg-red-600 border border-red-500 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">SALAH / X</button>
-                    <button onclick="switchTeam()" class="operator-btn bg-[#2563eb] hover:bg-blue-500 border border-blue-400 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">GANTI TIM</button>
-                    <button onclick="resetStrikes()" class="operator-btn bg-[#334155] hover:bg-slate-600 border border-slate-500 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">RESET X</button>
-                    <button onclick="revealAllCards()" class="operator-btn bg-[#334155] hover:bg-slate-600 border border-slate-500 text-white px-3 py-2 rounded-lg font-bold text-xs shadow-md">BUKA SEMUA</button>
-                    
-                    <div class="flex-grow"></div>
-                    
-                    <button onclick="nextRound()" id="btn-next-round" class="operator-btn bg-yellow-600 hover:bg-yellow-500 text-black px-5 py-2 rounded-lg font-bold text-xs shadow-md hidden animate-pulse">SOAL BERIKUTNYA ➔</button>
-                    <button onclick="location.reload()" class="operator-btn bg-[#1e293b] hover:bg-slate-700 border border-slate-600 text-white px-3 py-2 rounded-lg font-bold text-xs">RESET GAME</button>
-                </div>
-            </footer>
+            <!-- Operator Controls Footer (Tanpa tombol lanjut manual) -->
+            <div class="flex gap-2 justify-center flex-wrap pb-1">
+                <button onclick="addStrikeManual()" class="px-3 py-1 bg-red-700 hover:bg-red-600 text-white rounded font-bold text-xs border border-red-400 shadow">❌ SALAH (STRIKE)</button>
+                <button onclick="revealAllCards()" class="px-3 py-1 bg-blue-700 hover:bg-blue-600 text-white rounded font-bold text-xs border border-blue-400 shadow">👀 BUKA SEMUA</button>
+            </div>
         </div>
 
-        <!-- INTRO SCREEN: END GAME -->
-        <div id="screen-end" class="screen intro-bg items-center justify-center">
-            <div class="max-w-3xl w-full p-8 bg-[#111a3f]/95 backdrop-blur-xl rounded-3xl border-2 border-yellow-500 shadow-[0_0_60px_rgba(255,215,0,0.2)] text-center relative overflow-hidden z-20">
-                <h1 class="text-4xl md:text-5xl font-title font-black text-yellow-400 mb-2 animate-bounce drop-shadow-lg">SELAMAT!</h1>
-                <h2 class="text-lg text-blue-200 mb-6 tracking-widest uppercase font-bold">Pemenang Game Sejarah</h2>
+        <!-- SCREEN 5: END GAME (VICTORY) -->
+        <div id="screen-end" class="screen p-6 items-center justify-center text-center relative">
+            <div class="absolute inset-0 bg-blue-950/60 z-0"></div>
+            <div class="max-w-2xl w-full p-8 bg-blue-900/95 backdrop-blur-lg rounded-3xl gold-border shadow-[0_0_50px_rgba(255,215,0,0.4)] z-10 my-auto">
+                <h1 class="text-3xl md:text-4xl font-title font-black gold-text mb-2 animate-bounce">SELAMAT!</h1>
+                <h2 class="text-lg text-white mb-6">Pemenang Game Sejarah Hari Ini</h2>
                 
-                <div class="bg-gradient-to-b from-[#1e2f5d] to-[#0b1437] p-6 rounded-2xl border border-[#2a3f7a] mb-6 inline-block min-w-[280px] shadow-2xl">
-                    <div class="text-6xl mb-3 filter drop-shadow-lg">🏆</div>
-                    <h2 id="winner-name" class="text-3xl md:text-4xl font-title font-black text-white uppercase break-words drop-shadow-md">NAMA TIM</h2>
-                    <div class="mt-4 inline-block bg-yellow-500 text-black px-5 py-1.5 rounded-full font-black text-xl shadow-inner">SKOR TOTAL: <span id="winner-score">0</span></div>
+                <div class="bg-gradient-to-b from-yellow-500/20 to-transparent p-6 rounded-2xl border border-yellow-500/50 mb-6 inline-block min-w-[260px] shadow-inner">
+                    <div class="text-5xl mb-3 filter drop-shadow-lg">🏆</div>
+                    <h2 id="winner-name" class="text-2xl md:text-4xl font-title font-black text-white uppercase break-words">NAMA TIM</h2>
+                    <div class="mt-2 text-yellow-300 font-bold text-base">SKOR AKHIR: <span id="winner-score" class="text-2xl">0</span></div>
                 </div>
-                <br>
-                <button onclick="location.reload()" class="btn-gold px-10 py-3 rounded-full font-black text-lg font-title tracking-wide shadow-2xl hover:scale-105 transition-transform">MAIN LAGI ➔</button>
+
+                <div class="grid grid-cols-2 gap-4 text-center max-w-xs mx-auto mb-6 bg-blue-950 p-3 rounded-xl border border-blue-400 text-sm shadow">
+                    <div>
+                        <div id="final-team1-name" class="text-xs text-blue-300">Tim 1</div>
+                        <div id="final-team1-score" class="text-lg font-bold text-white">0</div>
+                    </div>
+                    <div>
+                        <div id="final-team2-name" class="text-xs text-blue-300">Tim 2</div>
+                        <div id="final-team2-score" class="text-lg font-bold text-white">0</div>
+                    </div>
+                </div>
+
+                <button onclick="location.reload()" class="px-8 py-3 btn-gold rounded-full font-bold text-base font-title tracking-wide shadow-lg">MAIN LAGI ➔</button>
             </div>
         </div>
     </div>
 
     <script>
         /* =========================================================================
-           BANK SOAL (6 BABAK: 4 dari permintaan + 1 Orde Lama + 1 Bonus Poin Ganda)
+            BANK SOAL (5 BABAK UTAMA @200 POIN = 1000 POIN + 1 BABAK BONUS)
         ========================================================================= */
         const questionsBank = [
             {
-                roundText: "BABAK 1: DINAMIKA ORDE LAMA",
-                question: "Peristiwa penting atau bersejarah apa yang terjadi pada masa Orde Lama (1950-1965)?",
-                answers: [
-                    { text: "KONFERENSI ASIA-AFRIKA", points: 40, keywords: ["kaa", "konferensi asia afrika", "asia afrika"] },
-                    { text: "PEMILU 1955", points: 30, keywords: ["pemilu", "pemilu 1955", "pemilu pertama"] },
-                    { text: "DEKRIT PRESIDEN", points: 15, keywords: ["dekrit", "dekrit presiden", "dekrit 5 juli"] },
-                    { text: "G30S / PKI", points: 10, keywords: ["g30s", "pki", "g30s pki", "gerakan 30 september", "gestapu"] },
-                    { text: "TRIKORA / DWIKORA", points: 5, keywords: ["trikora", "dwikora", "konfrontasi", "irian barat"] }
+                roundText: "BABAK 1: PERTEMPURAN PERTAHANAN KEMERDEKAAN",
+                q: "Sebutkan daerah atau kota yang menjadi lokasi pertempuran besar mempertahankan kemerdekaan selain Surabaya!",
+                a: [
+                    { t: "Ambarawa", p: 100, k: ["ambarawa"] },
+                    { t: "Bandung", p: 80, k: ["bandung", "lautan api"] },
+                    { t: "Medan", p: 60, k: ["medan", "area"] },
+                    { t: "Palembang", p: 40, k: ["palembang", "lima hari"] },
+                    { t: "Manado", p: 20, k: ["manado", "merah putih"] }
                 ]
             },
             {
-                roundText: "BABAK 2: EKONOMI ORDE LAMA",
-                question: "Sebutkan nama kebijakan sistem ekonomi yang pernah diterapkan masa Orde Lama!",
-                answers: [
-                    { text: "GUNTING SYAFRUDDIN", points: 40, keywords: ["gunting syafruddin", "syafruddin", "gunting uang"] },
-                    { text: "SISTEM ALI-BABA", points: 30, keywords: ["ali baba", "sistem ali baba", "ali-baba"] },
-                    { text: "SANERING UANG", points: 15, keywords: ["sanering", "pemotongan nilai uang", "devaluasi"] },
-                    { text: "NASIONALISASI DJB", points: 10, keywords: ["nasionalisasi", "de javasche bank", "djb"] },
-                    { text: "EKONOMI BENTENG", points: 5, keywords: ["benteng", "sistem benteng", "program benteng"] }
+                roundText: "BABAK 2: DUKUNGAN INTERNASIONAL",
+                q: "Sebutkan negara yang paling awal memberikan dukungan dan pengakuan kemerdekaan Indonesia!",
+                a: [
+                    { t: "Mesir", p: 100, k: ["mesir", "egypt"] },
+                    { t: "India", p: 80, k: ["india", "jawaharlal"] },
+                    { t: "Australia", p: 60, k: ["australia", "aussie"] },
+                    { t: "Palestina", p: 40, k: ["palestina", "palestine"] },
+                    { t: "Suriah / Lebanon", p: 20, k: ["suriah", "lebanon", "syria"] }
                 ]
             },
             {
-                roundText: "BABAK 3: DEKRIT PRESIDEN 1959",
-                question: "Apa saja isi atau keputusan dari Dekrit Presiden 5 Juli 1959?",
-                answers: [
-                    { text: "KEMBALI KE UUD 1945", points: 40, keywords: ["kembali ke uud 1945", "uud 1945", "uud 45"] },
-                    { text: "BUBARKAN KONSTITUANTE", points: 30, keywords: ["bubarkan konstituante", "konstituante"] },
-                    { text: "BENTUK MPRS & DPAS", points: 15, keywords: ["mprs", "dpas", "bentuk mprs"] },
-                    { text: "UUDS 1950 TIDAK BERLAKU", points: 10, keywords: ["uuds 1950", "uuds tidak berlaku"] },
-                    { text: "PEMBUBARAN KABINET", points: 5, keywords: ["pembubaran kabinet"] }
+                roundText: "BABAK 3: TONGGAK SEJARAH",
+                q: "Dokumen / Naskah penting yang menjadi tonggak sejarah kemerdekaan hingga kembalinya NKRI?",
+                a: [
+                    { t: "Naskah Proklamasi", p: 100, k: ["proklamasi", "teks proklamasi"] },
+                    { t: "UUD 1945", p: 80, k: ["uud", "undang undang"] },
+                    { t: "Piagam Jakarta", p: 60, k: ["piagam jakarta", "jakarta charter"] },
+                    { t: "Hasil KMB", p: 40, k: ["hasil kmb", "keputusan kmb"] },
+                    { t: "Supersemar", p: 20, k: ["supersemar", "surat perintah"] }
                 ]
             },
             {
-                roundText: "BABAK 4: PROYEK MERCUSUAR",
-                question: "Bangunan/Monumen yang dibangun pada 'Proyek Mercusuar' masa Demokrasi Terpimpin?",
-                answers: [
-                    { text: "MONAS", points: 40, keywords: ["monas", "monumen nasional"] },
-                    { text: "STADION GELORA BUNG KARNO", points: 30, keywords: ["gbk", "gelora bung karno", "senayan"] },
-                    { text: "MASJID ISTIQLAL", points: 15, keywords: ["istiqlal", "masjid istiqlal"] },
-                    { text: "HOTEL INDONESIA", points: 10, keywords: ["hotel indonesia", "hi"] },
-                    { text: "PATUNG SELAMAT DATANG", points: 5, keywords: ["patung selamat datang", "bundaran hi"] }
+                roundText: "BABAK 4: DINAMIKA ORDE LAMA",
+                q: "Peristiwa penting apa yang terjadi pada masa Orde Lama (1950-1965)?",
+                a: [
+                    { t: "Konferensi Asia Afrika", p: 100, k: ["kaa", "asia afrika"] },
+                    { t: "Pemilu 1955", p: 80, k: ["pemilu", "pemilihan"] },
+                    { t: "Dekrit Presiden 1959", p: 60, k: ["dekrit", "presiden 1959"] },
+                    { t: "G30S/PKI", p: 40, k: ["g30s", "pki", "30 september"] },
+                    { t: "Trikora", p: 20, k: ["trikora", "irian barat"] }
                 ]
             },
             {
-                roundText: "BABAK 5: PERJUANGAN FISIK & DIPLOMASI",
-                question: "Sebutkan nama perjanjian atau perundingan penting antara Indonesia dan Belanda dalam mempertahankan kemerdekaan!",
-                answers: [
-                    { text: "PERUNDINGAN LINGGARJATI", points: 40, keywords: ["linggarjati"] },
-                    { text: "PERJANJIAN RENVILLE", points: 30, keywords: ["renville"] },
-                    { text: "PERJANJIAN ROEM-ROYEN", points: 15, keywords: ["roem royen", "roem-royen"] },
-                    { text: "KONFERENSI MEJA BUNDAR (KMB)", points: 10, keywords: ["kmb", "konferensi meja bundar"] },
-                    { text: "PERUNDINGAN HOOGE VELUWE", points: 5, keywords: ["hooge veluwe", "hoge veluwe"] }
+                roundText: "BABAK 5: EKONOMI & PROYEK MERCUSUAR",
+                q: "Sebutkan kebijakan ekonomi atau proyek mercusuar pada masa Presiden Soekarno!",
+                a: [
+                    { t: "Monumen Nasional (Monas)", p: 100, k: ["monas", "monumen"] },
+                    { t: "Gelora Bung Karno", p: 80, k: ["gbk", "gelora", "senayan"] },
+                    { t: "Gunting Syafruddin", p: 60, k: ["gunting", "syafruddin", "syafrudin"] },
+                    { t: "Sistem Ali-Baba", p: 40, k: ["ali baba", "alibaba"] },
+                    { t: "Sanering", p: 20, k: ["sanering", "potong uang", "devaluasi"] }
                 ]
             },
             {
-                roundText: "BABAK 6: BONUS TONGGAK SEJARAH (POIN GANDA)",
-                question: "Dokumen atau naskah penting yang menjadi landasan berdirinya negara Republik Indonesia?",
-                answers: [
-                    { text: "TEKS PROKLAMASI", points: 40, keywords: ["proklamasi", "teks proklamasi", "naskah proklamasi"] },
-                    { text: "UUD 1945", points: 30, keywords: ["uud 1945", "uud 45"] },
-                    { text: "PANCASILA", points: 15, keywords: ["pancasila"] },
-                    { text: "PIAGAM JAKARTA", points: 10, keywords: ["piagam jakarta"] },
-                    { text: "NASKAH KMB", points: 5, keywords: ["kmb", "naskah kmb"] }
+                roundText: "BABAK 6: BONUS (POIN GANDA 2X)",
+                q: "Sebutkan 5 negara pelopor atau sponsor Konferensi Asia Afrika (KAA) tahun 1955!",
+                a: [
+                    { t: "Indonesia", p: 200, k: ["indonesia"] },
+                    { t: "India", p: 160, k: ["india"] },
+                    { t: "Pakistan", p: 120, k: ["pakistan"] },
+                    { t: "Sri Lanka / Ceylon", p: 80, k: ["sri lanka", "ceylon", "srilanka"] },
+                    { t: "Myanmar / Burma", p: 40, k: ["myanmar", "burma"] }
                 ]
             }
         ];
 
-        /* =========================================================================
-           STATE & LOGIC
-        ========================================================================= */
         let state = {
             roundIndex: 0,
             team1: "TIM 1",
             team2: "TIM 2",
-            score1Total: 0,
-            score2Total: 0,
-            currentRoundScore1: 0,
-            currentRoundScore2: 0,
+            score1: 0,
+            score2: 0,
             activeTeam: 1,
             roundPoints: 0,
-            revealed: [], 
+            revealed: [],
             strikes1: 0,
-            strikes2: 0
+            strikes2: 0,
+            isTransitioning: false
         };
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -435,7 +453,7 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
         }
 
-        function playTone(freq, type, duration, vol=0.3) {
+        function playTone(freq, type, duration, vol=0.8) {
             initAudio();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -450,13 +468,30 @@
         }
 
         function playCorrectSound() {
-            playTone(659.25, 'sine', 0.15, 0.4); 
-            setTimeout(() => playTone(880.00, 'sine', 0.4, 0.4), 100); 
+            playTone(523.25, 'sine', 0.2, 0.9);
+            setTimeout(() => playTone(659.25, 'sine', 0.2, 0.9), 120);
+            setTimeout(() => playTone(783.99, 'sine', 0.3, 0.9), 240);
+            setTimeout(() => playTone(1046.50, 'sine', 0.5, 1.0), 360);
+        }
+
+        function playGrandWinnerSound() {
+            initAudio();
+            const notes = [523.25, 659.25, 783.99, 1046.50, 783.99, 1046.50, 1318.51];
+            notes.forEach((note, idx) => {
+                setTimeout(() => {
+                    playTone(note, 'triangle', 0.35, 1.0);
+                    playTone(note * 1.25, 'sine', 0.35, 0.8);
+                }, idx * 180);
+            });
+            setTimeout(() => {
+                playTone(1046.50, 'sawtooth', 0.8, 1.0);
+                playTone(1318.51, 'sawtooth', 0.8, 1.0);
+            }, notes.length * 180);
         }
 
         function playWrongSound() {
-            playTone(150, 'sawtooth', 0.3, 0.5); 
-            setTimeout(() => playTone(100, 'sawtooth', 0.5, 0.5), 150); 
+            playTone(150, 'sawtooth', 0.5, 0.9);
+            setTimeout(() => playTone(100, 'sawtooth', 0.8, 0.9), 200);
         }
 
         function showScreen(screenId) {
@@ -473,13 +508,17 @@
             state.team1 = t1 || "TIM 1";
             state.team2 = t2 || "TIM 2";
             
-            document.querySelector('#panel-team1 h3').innerText = state.team1;
-            document.querySelector('#panel-team2 h3').innerText = state.team2;
+            document.getElementById('display-team1').innerText = state.team1;
+            document.getElementById('display-team2').innerText = state.team2;
+            document.getElementById('final-team1-name').innerText = state.team1;
+            document.getElementById('final-team2-name').innerText = state.team2;
             
             state.roundIndex = 0;
-            state.score1Total = 0;
-            state.score2Total = 0;
+            state.score1 = 0;
+            state.score2 = 0;
+            state.isTransitioning = false;
             
+            updateOverallScores();
             loadRound();
             showScreen('screen-game');
             setActiveTeam(1);
@@ -487,69 +526,59 @@
 
         function setActiveTeam(teamNum) {
             state.activeTeam = teamNum;
-            
-            const p1 = document.getElementById('panel-team1');
-            const p2 = document.getElementById('panel-team2');
-            
-            p1.classList.remove('active-team');
-            p2.classList.remove('active-team');
-            p1.querySelector('.status-giliran').classList.add('hidden');
-            p2.querySelector('.status-giliran').classList.add('hidden');
+            document.getElementById('panel-team1').classList.remove('opacity-50', 'scale-105', 'border-yellow-400');
+            document.getElementById('panel-team2').classList.remove('opacity-50', 'scale-105', 'border-yellow-400');
+            document.querySelectorAll('.status-giliran').forEach(el => el.classList.add('hidden'));
 
             if (teamNum === 1) {
-                p1.classList.add('active-team');
-                p1.querySelector('.status-giliran').classList.remove('hidden');
+                document.getElementById('panel-team2').classList.add('opacity-50');
+                document.getElementById('panel-team1').classList.add('scale-105', 'border-yellow-400');
+                document.getElementById('panel-team1').querySelector('.status-giliran').classList.remove('hidden');
             } else {
-                p2.classList.add('active-team');
-                p2.querySelector('.status-giliran').classList.remove('hidden');
+                document.getElementById('panel-team1').classList.add('opacity-50');
+                document.getElementById('panel-team2').classList.add('scale-105', 'border-yellow-400');
+                document.getElementById('panel-team2').querySelector('.status-giliran').classList.remove('hidden');
             }
             document.getElementById('answer-input').focus();
         }
 
-        function switchTeam() {
-            setActiveTeam(state.activeTeam === 1 ? 2 : 1);
-        }
-
         function loadRound() {
             const currentQ = questionsBank[state.roundIndex];
-            
-            document.getElementById('progress-text').innerText = `BABAK ${state.roundIndex + 1} DARI ${questionsBank.length}`;
-            const progressPercent = ((state.roundIndex + 1) / questionsBank.length) * 100;
-            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
-
-            document.getElementById('question-text').innerText = currentQ.question;
+            document.getElementById('round-indicator').innerText = currentQ.roundText;
+            document.getElementById('question-text').innerText = currentQ.q;
             
             state.revealed = [];
             state.roundPoints = 0;
-            state.currentRoundScore1 = 0;
-            state.currentRoundScore2 = 0;
+            state.isTransitioning = false;
             updateRoundPoints();
-            updateScoresUI();
-            updateOverallIndicator();
             
-            resetStrikes();
-            
-            document.getElementById('btn-next-round').classList.add('hidden');
+            state.strikes1 = 0;
+            state.strikes2 = 0;
+            updateStrikesUI(1);
+            updateStrikesUI(2);
+
             document.getElementById('answer-input').value = '';
 
             const container = document.getElementById('cards-container');
             container.innerHTML = '';
             
-            const selectEl = document.getElementById('manual-reveal-select');
-            selectEl.innerHTML = '';
-            
-            let isBonus = (state.roundIndex === 5);
-            currentQ.answers.forEach((ans, idx) => {
-                let displayPoints = ans.points * (isBonus ? 2 : 1);
+            currentQ.a.forEach((ans, idx) => {
+                let multiplier = (state.roundIndex === 5) ? 2 : 1;
+                let displayPts = ans.p * multiplier;
                 const cardHTML = `
-                    <div id="card-${idx}" class="answer-card flex items-center justify-between p-2.5 cursor-pointer" onclick="manualReveal(${idx})">
-                        <div class="w-8 h-8 rounded-full bg-[#08102b] flex items-center justify-center font-bold text-white text-base shadow-inner border border-[#1e2f5d]">${idx + 1}</div>
-                        <div id="card-text-${idx}" class="flex-grow text-center font-bold text-xl text-[#475569] tracking-widest uppercase px-3 truncate">?</div>
-                        <div class="w-14 text-right font-black text-blue-300 text-lg">${displayPoints}</div>
+                    <div class="flip-card" id="card-${idx}" onclick="manualReveal(${idx})">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front font-title shadow-lg">
+                                <span class="bg-blue-700 text-yellow-300 w-8 h-8 rounded-full flex items-center justify-center border border-yellow-400 font-bold text-sm">${idx + 1}</span>
+                            </div>
+                            <div class="flip-card-back shadow-lg font-title font-bold text-sm md:text-base text-yellow-300">
+                                <span>${ans.t}</span>
+                                <span class="bg-emerald-700 text-white px-2.5 py-0.5 rounded-full border border-emerald-300 text-xs">${displayPts}</span>
+                            </div>
+                        </div>
                     </div>
                 `;
                 container.innerHTML += cardHTML;
-                selectEl.innerHTML += `<option value="${idx}">Pilihan ${idx+1}</option>`;
             });
         }
 
@@ -557,44 +586,15 @@
             document.getElementById('round-points').innerText = state.roundPoints;
         }
 
-        function updateScoresUI() {
-            document.getElementById('score-team1').innerText = state.currentRoundScore1;
-            document.getElementById('score-team2').innerText = state.currentRoundScore2;
-        }
-
-        function updateOverallIndicator() {
-            document.getElementById('overall-score-indicator').innerText = `Total Tersimpan - ${state.team1}: ${state.score1Total} | ${state.team2}: ${state.score2Total}`;
-        }
-
-        function addScoreToActiveTeam(points) {
-            let isBonus = (state.roundIndex === 5);
-            let finalPoints = points * (isBonus ? 2 : 1);
-
-            if (state.activeTeam === 1) {
-                state.currentRoundScore1 += finalPoints;
-            } else {
-                state.currentRoundScore2 += finalPoints;
-            }
-            updateScoresUI();
-        }
-
-        function commitRoundScores() {
-            state.score1Total += state.currentRoundScore1;
-            state.score2Total += state.currentRoundScore2;
-            updateOverallIndicator();
-        }
-
-        function resetStrikes() {
-            state.strikes1 = 0;
-            state.strikes2 = 0;
-            updateStrikesUI(1);
-            updateStrikesUI(2);
+        function updateOverallScores() {
+            document.getElementById('overall-score1').innerText = state.score1;
+            document.getElementById('overall-score2').innerText = state.score2;
         }
 
         function updateStrikesUI(teamNum) {
             let strikesCount = teamNum === 1 ? state.strikes1 : state.strikes2;
-            let container = document.getElementById(`strikes-team${teamNum}`);
-            let xMarks = container.querySelectorAll('.strike-x');
+            let strikesContainer = document.getElementById(`strikes-team${teamNum}`);
+            let xMarks = strikesContainer.querySelectorAll('.strike-x');
             
             xMarks.forEach((x, idx) => {
                 if (idx < strikesCount) {
@@ -606,7 +606,8 @@
         }
 
         function checkAnswer() {
-            initAudio(); 
+            if (state.isTransitioning) return;
+            initAudio();
             const inputEl = document.getElementById('answer-input');
             const answerRaw = inputEl.value.trim().toLowerCase();
             
@@ -615,25 +616,25 @@
             const currentQ = questionsBank[state.roundIndex];
             let foundIndex = -1;
 
-            for (let i = 0; i < currentQ.answers.length; i++) {
+            for (let i = 0; i < currentQ.a.length; i++) {
                 if (state.revealed.includes(i)) continue;
                 
-                const keywords = currentQ.answers[i].keywords;
+                const keywords = currentQ.a[i].k;
                 const isMatch = keywords.some(kw => 
                     answerRaw.includes(kw.toLowerCase()) || 
                     kw.toLowerCase().includes(answerRaw) && answerRaw.length > 3
                 );
 
-                if (isMatch || answerRaw === currentQ.answers[i].text.toLowerCase()) {
+                if (isMatch || answerRaw === currentQ.a[i].t.toLowerCase()) {
                     foundIndex = i;
                     break;
                 }
             }
 
-            inputEl.value = ''; 
+            inputEl.value = '';
 
             if (foundIndex !== -1) {
-                triggerCorrect(foundIndex, currentQ.answers[foundIndex].points);
+                triggerCorrect(foundIndex, currentQ.a[foundIndex].p);
             } else {
                 triggerWrong();
             }
@@ -641,59 +642,53 @@
         }
 
         function triggerCorrect(index, points) {
-            if(state.revealed.includes(index)) return;
-
             state.revealed.push(index);
-            let isBonus = (state.roundIndex === 5);
-            let mult = isBonus ? 2 : 1;
-            state.roundPoints += (points * mult);
+            let multiplier = (state.roundIndex === 5) ? 2 : 1;
+            let earned = points * multiplier;
+            
+            state.roundPoints += earned;
             updateRoundPoints();
+
+            if (state.activeTeam === 1) {
+                state.score1 += earned;
+            } else {
+                state.score2 += earned;
+            }
+            updateOverallScores();
             
-            addScoreToActiveTeam(points);
-            
-            revealCardUI(index);
+            const card = document.getElementById(`card-${index}`);
+            card.classList.add('flipped');
             
             playCorrectSound();
             confetti({
-                particleCount: 50,
+                particleCount: 60,
                 spread: 60,
                 origin: { y: 0.6 },
-                colors: ['#FFD700', '#3B82F6', '#FFFFFF']
+                colors: ['#FFD700', '#FFFFFF', '#60A5FA']
             });
 
             checkRoundComplete();
         }
 
-        function revealCardUI(index) {
-            const currentQ = questionsBank[state.roundIndex];
-            const card = document.getElementById(`card-${index}`);
-            const textEl = document.getElementById(`card-text-${index}`);
-            
-            card.classList.add('revealed');
-            textEl.innerText = currentQ.answers[index].text;
-            textEl.classList.remove('text-[#475569]');
-            textEl.classList.add('text-white');
-            
-            card.children[0].classList.replace('bg-[#08102b]', 'bg-blue-800');
-            card.children[0].classList.replace('border-[#1e2f5d]', 'border-blue-400');
-            card.children[2].classList.replace('text-blue-300', 'text-yellow-300');
-        }
-
         function triggerWrong() {
             playWrongSound();
             
-            let currentStrikes = 0;
-
             if (state.activeTeam === 1) {
                 state.strikes1++;
-                if (state.strikes1 > 3) state.strikes1 = 3;
+                if (state.strikes1 >= 3) {
+                    state.strikes1 = 3;
+                    updateStrikesUI(1);
+                    setTimeout(() => { setActiveTeam(2); }, 500);
+                }
                 updateStrikesUI(1);
-                currentStrikes = state.strikes1;
             } else {
                 state.strikes2++;
-                if (state.strikes2 > 3) state.strikes2 = 3;
+                if (state.strikes2 >= 3) {
+                    state.strikes2 = 3;
+                    updateStrikesUI(2);
+                    setTimeout(() => { setActiveTeam(1); }, 500);
+                }
                 updateStrikesUI(2);
-                currentStrikes = state.strikes2;
             }
 
             const overlay = document.getElementById('overlay-wrong');
@@ -709,14 +704,7 @@
                 overlay.classList.add('opacity-0');
                 emoji.classList.remove('animate-pop');
                 emoji.classList.add('scale-0');
-                
-                // Automatic switch team when 3 strikes reached
-                if (currentStrikes === 3) {
-                    setTimeout(() => {
-                        switchTeam();
-                    }, 300);
-                }
-            }, 1000);
+            }, 1200);
         }
 
         function addStrikeManual() {
@@ -724,33 +712,22 @@
         }
 
         function manualReveal(index) {
+            if (state.isTransitioning) return;
             if (!state.revealed.includes(index)) {
                 state.revealed.push(index);
-                let isBonus = (state.roundIndex === 5);
-                let mult = isBonus ? 2 : 1;
-                state.roundPoints += (questionsBank[state.roundIndex].answers[index].points * mult);
-                updateRoundPoints();
-                addScoreToActiveTeam(questionsBank[state.roundIndex].answers[index].points);
-                revealCardUI(index);
+                document.getElementById(`card-${index}`).classList.add('flipped');
                 playCorrectSound();
                 checkRoundComplete();
             }
         }
 
-        function revealSelectedCard() {
-            const selectEl = document.getElementById('manual-reveal-select');
-            const idx = parseInt(selectEl.value);
-            if(!isNaN(idx)) {
-                manualReveal(idx);
-            }
-        }
-
         function revealAllCards() {
+            if (state.isTransitioning) return;
             const currentQ = questionsBank[state.roundIndex];
-            currentQ.answers.forEach((_, idx) => {
+            currentQ.a.forEach((_, idx) => {
                 if (!state.revealed.includes(idx)) {
+                    document.getElementById(`card-${idx}`).classList.add('flipped');
                     state.revealed.push(idx);
-                    revealCardUI(idx);
                 }
             });
             checkRoundComplete();
@@ -758,63 +735,78 @@
 
         function checkRoundComplete() {
             const currentQ = questionsBank[state.roundIndex];
-            if (state.revealed.length === currentQ.answers.length) {
-                commitRoundScores();
-                document.getElementById('btn-next-round').classList.remove('hidden');
+            if (state.revealed.length === currentQ.a.length && !state.isTransitioning) {
+                state.isTransitioning = true;
                 
-                // Automatic transition after 3 seconds
+                // Diam 5 detik setelah semua kartu terbuka
                 setTimeout(() => {
-                    showTransitionAndNext();
-                }, 3000);
+                    if (state.roundIndex + 1 < questionsBank.length) {
+                        showTransitionScreen();
+                    } else {
+                        endGame();
+                    }
+                }, 5000);
             }
         }
 
-        function showTransitionAndNext() {
+        function showTransitionScreen() {
+            const transScreen = document.getElementById('screen-transition');
+            const msg1 = document.getElementById('trans-msg-1');
+            const msg2 = document.getElementById('trans-msg-2');
+            const transTitle = document.getElementById('transition-title');
+            
+            let currentRndNum = state.roundIndex + 1;
+            let nextRndNum = state.roundIndex + 2;
+
+            msg1.innerText = `BABAK ${currentRndNum} SELESAI!`;
+            msg2.innerText = `Melanjutkan ke Babak ${nextRndNum}...`;
+            transTitle.innerText = `BABAK ${nextRndNum} DIMULAI`;
+
+            transScreen.classList.remove('hidden');
+
+            // Muncul selama 2 detik
+            setTimeout(() => {
+                transScreen.classList.add('hidden');
+                nextRound();
+            }, 2000);
+        }
+
+        function nextRound() {
             state.roundIndex++;
             if (state.roundIndex >= questionsBank.length) {
                 endGame();
             } else {
-                const transOverlay = document.getElementById('screen-transition');
-                const transTitle = document.getElementById('transition-title');
-                transTitle.innerText = `BABAK ${state.roundIndex + 1}`;
-                transOverlay.classList.remove('hidden');
-                transOverlay.classList.add('flex');
-
-                setTimeout(() => {
-                    transOverlay.classList.remove('flex');
-                    transOverlay.classList.add('hidden');
-                    loadRound();
-                }, 2000);
+                loadRound();
             }
-        }
-
-        function nextRound() {
-            showTransitionAndNext();
         }
 
         function endGame() {
             showScreen('screen-end');
             
-            let winner = state.score1Total >= state.score2Total ? state.team1 : state.team2;
-            let winScore = state.score1Total >= state.score2Total ? state.score1Total : state.score2Total;
-            if (state.score1Total === state.score2Total) winner = "SERI (DRAW)";
+            let winner = state.score1 >= state.score2 ? state.team1 : state.team2;
+            let winScore = state.score1 >= state.score2 ? state.score1 : state.score2;
+            if (state.score1 === state.score2) winner = "SERI (DRAW)";
 
             document.getElementById('winner-name').innerText = winner;
             document.getElementById('winner-score').innerText = winScore;
-            
-            var duration = 3 * 1000;
+            document.getElementById('final-team1-score').innerText = state.score1;
+            document.getElementById('final-team2-score').innerText = state.score2;
+
+            playGrandWinnerSound();
+
+            var duration = 4 * 1000;
             var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+            var defaults = { startVelocity: 35, spread: 360, ticks: 80, zIndex: 100 };
 
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
             var interval = setInterval(function() {
                 var timeLeft = animationEnd - Date.now();
                 if (timeLeft <= 0) return clearInterval(interval);
-                var particleCount = 50 * (timeLeft / duration);
+                var particleCount = 60 * (timeLeft / duration);
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
+            }, 200);
         }
     </script>
 </body>
